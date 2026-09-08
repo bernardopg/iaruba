@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.0](https://github.com/bernardopg/ioruba/compare/v1.8.4...v1.9.0) (2026-09-08)
+
 ### Added
 
 - Firmware `0.6.2` publishes its effective knob, button and encoder pin map in
@@ -22,6 +24,21 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   longer be merged into a corrupt frame.
 - Boot noise and individual malformed serial frames are logged and discarded
   without marking a live serial connection as failed.
+- The AUR `-bin` package is installable again: `package()` redirected the
+  launcher into `${pkgdir}/usr/bin` without creating the directory, so
+  `makepkg` died with "No such file or directory" on every build.
+
+### Changed
+
+- Migrated the test stack to vitest 5: `vitest` and `@vitest/coverage-v8` are
+  now 5.0.0 in both workspaces, with a Vitest `Assertion` augmentation so the
+  jest-axe `toHaveNoViolations()` matcher typechecks again under the new
+  interface.
+- Bumped dependencies: `tauri-plugin-dialog` to 2.7.3, `tauri-plugin-updater`
+  to 2.11.0, `tauri-plugin-single-instance` to 2.4.4, `tauri-plugin-opener` to
+  2.5.5, `tauri-plugin-serialplugin-api` to 3.0.5, `lucide-react` to 1.43.0,
+  `@types/node` to 26.5.0, `@types/react-dom` to 19.2.7 and GitHub Actions to
+  their latest versions, plus 139 transitive Rust lockfile bumps.
 
 ## [1.8.4](https://github.com/bernardopg/ioruba/compare/v1.8.2...v1.8.4) (2026-08-25)
 
