@@ -236,6 +236,8 @@ sudo pacman -S --needed \
 
 New Arch libraries can expose a `linuxdeploy`/`strip` incompatibility around `.relr.dyn`. Use the release binary for a local behavior smoke test, or build the public AppImage in CI/Ubuntu 22.04. Release CI validates extraction and launch with `scripts/validate-appimage.sh --require-launch`.
 
+When copying a freshly built AppImage over a previous local install (e.g. `~/.local/bin/ioruba.AppImage`) for a smoke test, use `scripts/dev-deploy-appimage.sh <built.AppImage>` instead of a plain `cp`. A plain `cp` truncates the destination file in place; if an old instance is still running from it (FUSE-mounted under `/tmp/.mount_ioruba*`), the rewrite happens under its mmap'd pages and crashes it with `SIGBUS`/`SIGABRT` (this is exactly what produced the `ioruba-desktop`/`WebKitWebProcess` crash burst around the 1.9.0 release). The script copies to a temp file and renames atomically, so any already-running instance keeps reading its old, intact mapping until it is closed and relaunched.
+
 ### Windows or macOS application targets do not work
 
 This is an explicit current limitation. Those platforms support default-output `master` volume only; application/source/sink targets return unsupported outcomes rather than pretending to apply.
