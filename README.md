@@ -100,7 +100,7 @@ curl -fsSL https://raw.githubusercontent.com/bernardopg/ioruba/main/scripts/inst
 Useful options:
 
 ```bash
-./scripts/install.sh --version v1.8.2
+./scripts/install.sh --version v1.9.1
 ./scripts/install.sh --type appimage   # Linux default
 ./scripts/install.sh --type deb
 ./scripts/install.sh --type rpm
@@ -120,7 +120,7 @@ irm https://raw.githubusercontent.com/bernardopg/ioruba/main/scripts/install.ps1
 The default installer type is MSI. To run the script locally with explicit options:
 
 ```powershell
-.\scripts\install.ps1 -Version v1.8.2 -Type msi
+.\scripts\install.ps1 -Version v1.9.1 -Type msi
 .\scripts\install.ps1 -Type nsis
 ```
 

@@ -64,7 +64,7 @@ curl -fsSL https://raw.githubusercontent.com/bernardopg/ioruba/main/scripts/inst
 O padrão no Linux é AppImage sem root em `~/.local/bin/ioruba.AppImage`. O instalador exige uma entrada exata em `SHA256SUMS.txt` e recusa instalação sem verificação. Opções locais:
 
 ```bash
-./scripts/install.sh --version v1.8.2
+./scripts/install.sh --version v1.9.1
 ./scripts/install.sh --type appimage
 ./scripts/install.sh --type deb
 ./scripts/install.sh --type rpm
@@ -84,7 +84,7 @@ irm https://raw.githubusercontent.com/bernardopg/ioruba/main/scripts/install.ps1
 O padrão é MSI. Opções locais:
 
 ```powershell
-.\scripts\install.ps1 -Version v1.8.2 -Type msi
+.\scripts\install.ps1 -Version v1.9.1 -Type msi
 .\scripts\install.ps1 -Type nsis
 ```
 
