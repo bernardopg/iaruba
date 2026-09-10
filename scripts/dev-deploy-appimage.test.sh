@@ -82,5 +82,21 @@ else
 fi
 check "sem argumentos retorna erro" "1" "$([ "$rc5" -ne 0 ] && echo 1 || echo 0)"
 
+# ── Caso 6: o deploy padrao instala um launcher que passa pelo wrapper ──────
+home6="${TMPDIR_TEST}/home"
+xdg6="${TMPDIR_TEST}/xdg"
+src6="${TMPDIR_TEST}/new-build-6.AppImage"
+printf 'build-com-integracao' > "$src6"
+HOME="$home6" XDG_DATA_HOME="$xdg6" bash "$DEPLOY_SH" "$src6" >/dev/null
+check "instala wrapper de compatibilidade" "1" \
+    "$([ -x "$home6/.local/bin/ioruba-appimage-compat" ] && echo 1 || echo 0)"
+check "instala comando estavel para o menu" "1" \
+    "$([ -x "$home6/.local/bin/ioruba-desktop" ] && echo 1 || echo 0)"
+check "entrada desktop usa o comando compativel" \
+    "Exec=$home6/.local/bin/ioruba-desktop" \
+    "$(grep '^Exec=' "$xdg6/applications/io.ioruba.desktop.desktop")"
+check "entrada desktop nao injeta workaround insuficiente do WebKit" "0" \
+    "$(grep -c 'WEBKIT_DISABLE_DMABUF_RENDERER' "$xdg6/applications/io.ioruba.desktop.desktop")"
+
 printf '\n%d checks, %d failures\n' "$checks" "$failures"
 exit "$((failures > 0 ? 1 : 0))"

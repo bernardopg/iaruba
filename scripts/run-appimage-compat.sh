@@ -32,13 +32,29 @@ if [ ! -x "${APPDIR}/AppRun" ]; then
         cd "$RUNTIME_DIR"
         "$APPIMAGE_ABS" --appimage-extract >/dev/null
     )
-    
-    rm -f \
-    "${APPDIR}/usr/lib/libwayland-egl.so.1" \
-    "${APPDIR}/usr/lib/libwayland-client.so.0" \
-    "${APPDIR}/usr/lib/libwayland-cursor.so.0" \
-    "${APPDIR}/usr/lib/libwayland-server.so.0"
 fi
+
+# linuxdeploy bundles parts of the display ABI from the old build image while
+# Mesa/EGL comes from the host.  On rolling distros (Mesa 26+) that mixture
+# aborts WebKitWebProcess with EGL_BAD_ALLOC and leaves Tauri's grey window
+# behind.  These libraries must form one host-provided ABI set.  Run the cleanup
+# on every launch so caches created by an older version of this wrapper are
+# repaired too.  See tauri-apps/tauri#15976.
+for library in \
+    libwayland-client.so.0 \
+    libwayland-cursor.so.0 \
+    libwayland-egl.so.1 \
+    libwayland-server.so.0 \
+    libxkbcommon.so.0 \
+    libxcb-randr.so.0 \
+    libxcb-render.so.0 \
+    libxcb-shm.so.0 \
+    libXau.so.6 \
+    libXdmcp.so.6
+do
+    find "${APPDIR}/usr/lib" -type f -name "$library" -delete 2>/dev/null || true
+    find "${APPDIR}/usr/lib" -type l -name "$library" -delete 2>/dev/null || true
+done
 
 if [ ! -x "${APPDIR}/AppRun" ]; then
     echo "Falha ao preparar runtime compativel para ${APP_BASENAME}" >&2

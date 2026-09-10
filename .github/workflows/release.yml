@@ -575,6 +575,10 @@ jobs:
             "ioruba.svg::https://raw.githubusercontent.com/bernardopg/ioruba/v\${pkgver}/apps/desktop/src-tauri/icons/app-icon.svg"
             "run-appimage-compat.sh::https://raw.githubusercontent.com/bernardopg/ioruba/v\${pkgver}/scripts/run-appimage-compat.sh"
           )
+          # makepkg reconhece o payload squashfs e tenta extrair AppImages por
+          # padrao. Isso deixa no srcdir apenas o runtime ELF (~924 KiB), que o
+          # package() copiava como se fosse o app completo.
+          noextract=("${APPIMAGE_ASSET_NAME}")
           sha256sums=('${APPIMAGE_SHA256}' '${ICON_SHA256}' '${ICON_SVG_SHA256}' '${COMPAT_SHA256}')
 
           package() {
@@ -634,6 +638,7 @@ jobs:
             "$(printf '\t')source = ioruba.png::https://raw.githubusercontent.com/bernardopg/ioruba/v${VERSION}/apps/desktop/src-tauri/icons/128x128.png" \
             "$(printf '\t')source = ioruba.svg::https://raw.githubusercontent.com/bernardopg/ioruba/v${VERSION}/apps/desktop/src-tauri/icons/app-icon.svg" \
             "$(printf '\t')source = run-appimage-compat.sh::https://raw.githubusercontent.com/bernardopg/ioruba/v${VERSION}/scripts/run-appimage-compat.sh" \
+            "$(printf '\t')noextract = ${APPIMAGE_ASSET_NAME}" \
             "$(printf '\t')sha256sums = ${APPIMAGE_SHA256}" \
             "$(printf '\t')sha256sums = ${ICON_SHA256}" \
             "$(printf '\t')sha256sums = ${ICON_SVG_SHA256}" \

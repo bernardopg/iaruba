@@ -28,8 +28,10 @@
 #   destino default: ~/.local/bin/ioruba.AppImage
 set -eu
 
+SCRIPT_DIR="$(CDPATH='' cd -- "$(dirname -- "$0")" && pwd)"
 SRC="${1:-}"
-DEST="${2:-${HOME}/.local/bin/ioruba.AppImage}"
+DEFAULT_DEST="${HOME}/.local/bin/ioruba.AppImage"
+DEST="${2:-${DEFAULT_DEST}}"
 
 if [ -z "$SRC" ]; then
     echo "Uso: $0 <appimage-de-origem> [destino]" >&2
@@ -66,5 +68,45 @@ fi
 
 mv -- "$TMP" "$DEST"
 trap - EXIT
+
+# O launcher do menu precisa passar pelo runtime de compatibilidade. Executar o
+# AppImage diretamente deixa as libwayland/xcb antigas do linuxdeploy à frente
+# do Mesa do host e, em Mesa 26+, o WebKit aborta com EGL_BAD_ALLOC: sobra uma
+# janela cinza e nenhum hook React (inclusive o serial) chega a iniciar.
+if [ "$DEST" = "$DEFAULT_DEST" ]; then
+    COMPAT_DEST="${DEST_DIR}/ioruba-appimage-compat"
+    LAUNCHER_DEST="${DEST_DIR}/ioruba-desktop"
+    APPLICATIONS_DIR="${XDG_DATA_HOME:-${HOME}/.local/share}/applications"
+    DESKTOP_DEST="${APPLICATIONS_DIR}/io.ioruba.desktop.desktop"
+
+    install -m 0755 "${SCRIPT_DIR}/run-appimage-compat.sh" "$COMPAT_DEST"
+    cat > "$LAUNCHER_DEST" <<EOF
+#!/usr/bin/env sh
+exec "${COMPAT_DEST}" "${DEST}" "\$@"
+EOF
+    chmod 0755 "$LAUNCHER_DEST"
+
+    mkdir -p -- "$APPLICATIONS_DIR"
+    cat > "$DESKTOP_DEST" <<EOF
+[Desktop Entry]
+Type=Application
+Name=Ioruba
+GenericName=Audio Mixer
+GenericName[pt_BR]=Mixer de Áudio
+Comment=Tactile audio mixer for Arduino-based Linux control
+Comment[pt_BR]=Mixer de áudio tátil para controle via Arduino no Linux
+Exec=${LAUNCHER_DEST}
+Icon=ioruba
+Terminal=false
+Categories=AudioVideo;Audio;Mixer;
+Keywords=audio;mixer;volume;arduino;serial;hardware;potentiometer;
+StartupNotify=true
+StartupWMClass=io.ioruba.desktop
+EOF
+
+    if command -v update-desktop-database >/dev/null 2>&1; then
+        update-desktop-database "$APPLICATIONS_DIR" >/dev/null 2>&1 || true
+    fi
+fi
 
 echo "Deploy atomico concluido: ${DEST}"

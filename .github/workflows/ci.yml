@@ -264,15 +264,15 @@ jobs:
         with:
           persist-credentials: false
 
-      # shellcheck ships on ubuntu-latest runners; lint the POSIX/bash installers.
+      # shellcheck ships on ubuntu-latest runners; keep the canonical file list
+      # in package.json so newly added installer regressions cannot miss CI.
       - name: ShellCheck installer and AppImage scripts
-        run: shellcheck scripts/install.sh scripts/install.test.sh scripts/run-appimage-compat.sh scripts/validate-appimage.sh
+        run: npm run lint:scripts
 
-      # The installer picks release assets by architecture. Getting that wrong
-      # means an x86_64 binary on an arm64 machine, so the selection logic is
-      # exercised against fixture release payloads on every run.
-      - name: Test installer asset selection
-        run: bash scripts/install.test.sh
+      # The installer picks release assets by architecture and the AppImage
+      # launchers must preserve both atomic deployment and host graphics ABI.
+      - name: Test installer and AppImage launchers
+        run: npm run test:installer
 
       - name: Test package manager and updater manifests
         run: node --test scripts/packaging/*.test.mjs
