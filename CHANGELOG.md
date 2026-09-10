@@ -7,6 +7,8 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [1.9.1](https://github.com/bernardopg/ioruba/compare/v1.9.0...v1.9.1) (2026-09-09)
+
 ### Fixed
 
 - AppImage launchers now remove the complete stale display-library set bundled by linuxdeploy before starting WebKit, preventing `EGL_BAD_ALLOC` grey windows on Mesa 26+; local dev deploys install the compatibility launcher as the app-menu entry.
