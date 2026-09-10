@@ -84,7 +84,8 @@ check "sem argumentos retorna erro" "1" "$([ "$rc5" -ne 0 ] && echo 1 || echo 0)
 
 # ── Caso 6: o deploy padrao instala um launcher que passa pelo wrapper ──────
 home6="${TMPDIR_TEST}/home"
-xdg6="${TMPDIR_TEST}/xdg"
+home6="${TMPDIR_TEST}/home with spaces"
+xdg6="${TMPDIR_TEST}/xdg with spaces"
 src6="${TMPDIR_TEST}/new-build-6.AppImage"
 fixture_result6="${TMPDIR_TEST}/fixture-result"
 cat > "$src6" <<EOF
@@ -113,6 +114,8 @@ desktop_value() {
 }
 desktop_type6="$(desktop_value Type)"
 desktop_exec6="$(desktop_value Exec)"
+desktop_exec6="${desktop_exec6#\"}"
+desktop_exec6="${desktop_exec6%\"}"
 check "entrada desktop e uma aplicacao" "Application" "$desktop_type6"
 check "entrada desktop usa o comando compativel" \
     "$home6/.local/bin/ioruba-desktop" "$desktop_exec6"
