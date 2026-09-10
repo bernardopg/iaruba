@@ -86,17 +86,40 @@ check "sem argumentos retorna erro" "1" "$([ "$rc5" -ne 0 ] && echo 1 || echo 0)
 home6="${TMPDIR_TEST}/home"
 xdg6="${TMPDIR_TEST}/xdg"
 src6="${TMPDIR_TEST}/new-build-6.AppImage"
-printf 'build-com-integracao' > "$src6"
+fixture_result6="${TMPDIR_TEST}/fixture-result"
+cat > "$src6" <<EOF
+#!/usr/bin/env sh
+set -eu
+if [ "\$1" = "--appimage-extract" ]; then
+    :
+    mkdir -p squashfs-root
+    cat > squashfs-root/AppRun <<'APP_RUN'
+#!/usr/bin/env sh
+printf 'launcher-executado\n' > "${fixture_result6}"
+printf 'WEBKIT_DISABLE_DMABUF_RENDERER=%s\n' "\${WEBKIT_DISABLE_DMABUF_RENDERER-unset}" >> "${fixture_result6}"
+APP_RUN
+    chmod 0755 squashfs-root/AppRun
+fi
+EOF
+chmod 0755 "$src6"
 HOME="$home6" XDG_DATA_HOME="$xdg6" bash "$DEPLOY_SH" "$src6" >/dev/null
 check "instala wrapper de compatibilidade" "1" \
     "$([ -x "$home6/.local/bin/ioruba-appimage-compat" ] && echo 1 || echo 0)"
 check "instala comando estavel para o menu" "1" \
     "$([ -x "$home6/.local/bin/ioruba-desktop" ] && echo 1 || echo 0)"
+desktop6="$xdg6/applications/io.ioruba.desktop.desktop"
+desktop_value() {
+    awk -F= -v key="$1" '$1 == key { print substr($0, length(key) + 2); exit }' "$desktop6"
+}
+desktop_type6="$(desktop_value Type)"
+desktop_exec6="$(desktop_value Exec)"
+check "entrada desktop e uma aplicacao" "Application" "$desktop_type6"
 check "entrada desktop usa o comando compativel" \
-    "Exec=$home6/.local/bin/ioruba-desktop" \
-    "$(grep '^Exec=' "$xdg6/applications/io.ioruba.desktop.desktop")"
-check "entrada desktop nao injeta workaround insuficiente do WebKit" "0" \
-    "$(grep -c 'WEBKIT_DISABLE_DMABUF_RENDERER' "$xdg6/applications/io.ioruba.desktop.desktop")"
+    "$home6/.local/bin/ioruba-desktop" "$desktop_exec6"
+HOME="$home6" XDG_CACHE_HOME="${TMPDIR_TEST}/cache6" "$desktop_exec6" >/dev/null
+check "launcher executa o AppImage pelo wrapper" "launcher-executado" "$(sed -n '1p' "$fixture_result6")"
+check "launcher nao injeta workaround insuficiente do WebKit" \
+    "WEBKIT_DISABLE_DMABUF_RENDERER=unset" "$(sed -n '2p' "$fixture_result6")"
 
 printf '\n%d checks, %d failures\n' "$checks" "$failures"
 exit "$((failures > 0 ? 1 : 0))"
